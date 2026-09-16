@@ -260,7 +260,7 @@ final class FeishuClient {
 
     private func fetchUserInfo() async throws -> UserInfo {
         let request = URLRequest(url: URL(string: settings.domain.openAPIBaseURL + "/authen/v1/user_info")!)
-        let data = try await authorizedData(for: &request)
+        let data = try await authorizedData(for: request)
         let response = try JSONDecoder().decode(FeishuResponse<UserInfo>.self, from: data)
         guard response.code == 0, let user = response.data else {
             throw FeishuError.api(response.code, response.msg ?? "获取用户信息失败")
