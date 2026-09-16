@@ -26,7 +26,7 @@ jobs:
             -target ProcurementTracker \
             -configuration Release \
             -sdk macosx \
-            -derivedDataPath ../build \
+            CONFIGURATION_BUILD_DIR="$GITHUB_WORKSPACE/dist-app" \
             CODE_SIGN_IDENTITY="-" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=YES \
@@ -35,9 +35,10 @@ jobs:
       - name: Package app with first-launch helper
         run: |
           set -e
-          APP_PATH=$(find build/Build/Products -name "ProcurementTracker.app" -type d | head -1)
-          if [ -z "$APP_PATH" ]; then
+          APP_PATH="$GITHUB_WORKSPACE/dist-app/ProcurementTracker.app"
+          if [ ! -d "$APP_PATH" ]; then
             echo "::error::未找到编译产物 ProcurementTracker.app"
+            find "$GITHUB_WORKSPACE" -name "ProcurementTracker.app" -type d || true
             exit 1
           fi
           echo "编译产物位置：$APP_PATH"
