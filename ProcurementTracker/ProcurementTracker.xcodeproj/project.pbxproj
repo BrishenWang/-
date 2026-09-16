@@ -16,9 +16,23 @@
 		};
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		001A2B3C0000000000000020 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				ProcurementTracker.entitlements,
+			);
+			target = 001A2B3C0000000000000006 /* ProcurementTracker */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		001A2B3C0000000000000001 /* ProcurementTracker */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				001A2B3C0000000000000020 /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
+			);
 			path = ProcurementTracker;
 			sourceTree = "<group>";
 		};
