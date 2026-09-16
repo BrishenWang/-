@@ -280,13 +280,15 @@ final class FeishuClient {
         request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.httpBody = Data("{}".utf8)
 
-        let data = try await authorizedData(for: &request)
+        let data = try await authorizedData(for: request)
         let response = try JSONDecoder().decode(FeishuResponse<PrimaryCalendarData>.self, from: data)
         guard response.code == 0 else {
             throw FeishuError.api(response.code, response.msg ?? "查询主日历失败")
         }
-        guard let id = response.data?.calendars.first(where: { $0.type == "primary" })?.calendarID
-            ?? response.data?.calendars.first?.calendarID else {
+        let calendars = response.data?.calendars ?? []
+        let primaryID = calendars.first(where: { $0.type == "primary" })?.calendarID
+        let anyID = calendars.first?.calendarID
+        guard let id = primaryID ?? anyID else {
             throw FeishuError.noCalendar
         }
         settings.feishuCalendarID = id
@@ -318,7 +320,7 @@ final class FeishuClient {
         )
         request.httpBody = try JSONEncoder().encode(payload)
 
-        let data = try await authorizedData(for: &request)
+        let data = try await authorizedData(for: request)
         let response = try JSONDecoder().decode(FeishuResponse<EventData>.self, from: data)
         guard response.code == 0, let eventID = response.data?.event.eventID else {
             throw FeishuError.api(response.code, response.msg ?? "创建日程失败")
@@ -338,7 +340,7 @@ final class FeishuClient {
         deleteRequest.httpMethod = "DELETE"
 
         do {
-            _ = try await authorizedData(for: &deleteRequest)
+           _ = try await authorizedData(for: deleteRequest)
         } catch FeishuError.api(let code, _) where code == 193001 || code == 191000 || code == 191003 {
             // 日程或日历已删除，忽略
         }
