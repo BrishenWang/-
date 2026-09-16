@@ -59,7 +59,7 @@ struct SettingsView: View {
             }
             .fileExporter(
                 isPresented: $showExporter,
-                document: $exportDocument,
+                document: exportDocument,
                 contentType: .json,
                 defaultFilename: exportFilename
             ) { _ in }
