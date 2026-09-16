@@ -1,0 +1,60 @@
+name: Build ProcurementTracker for macOS
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-mac:
+    name: Build macOS App
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Build app (ad-hoc signing, no developer account needed)
+        working-directory: ProcurementTracker
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project ProcurementTracker.xcodeproj \
+            -target ProcurementTracker \
+            -configuration Release \
+            -sdk macosx \
+            -derivedDataPath ../build \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=YES \
+            ONLY_ACTIVE_ARCH=NO
+
+      - name: Package app with first-launch helper
+        run: |
+          set -e
+          APP_PATH=$(find build/Build/Products -name "ProcurementTracker.app" -type d | head -1)
+          if [ -z "$APP_PATH" ]; then
+            echo "::error::未找到编译产物 ProcurementTracker.app"
+            exit 1
+          fi
+          echo "编译产物位置：$APP_PATH"
+
+          rm -rf dist && mkdir -p dist
+          ditto "$APP_PATH" dist/ProcurementTracker.app
+          cp "scripts/首次打开.command" "dist/首次打开.command"
+          chmod +x "dist/首次打开.command"
+
+          codesign -dv dist/ProcurementTracker.app 2>&1 | head -5 || true
+
+          cd dist
+          ditto -c -k --keepParent ProcurementTracker.app "首次打开.command" ../ProcurementTracker-App.zip
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ProcurementTracker-Mac
+          path: ProcurementTracker-App.zip
+          retention-days: 90
